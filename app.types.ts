@@ -12,3 +12,7 @@ export interface ICourses {
 	previewImage: string
 	published: boolean
 }
+export interface ISection {
+	_id: string
+	title: string
+}

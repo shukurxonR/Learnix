@@ -1,12 +1,10 @@
 'use client'
 
+import { getCourseSections } from '@/actions/section-action'
+import { ICourses, ISection } from '@/app.types'
 import ReviewCard from '@/components/cards/overview-card'
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from '@/components/ui/accordion'
+import SectionLoading from '@/components/shared/section-loading'
+import { Accordion } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import useTranslate from '@/hooks/use-lng'
@@ -18,9 +16,27 @@ import {
 	MonitorPlay,
 	Star,
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import SectionList from './section-list'
 
-function Overview() {
+function Overview(course: ICourses) {
 	const t = useTranslate()
+	const [isLoading, setIsLoading] = useState(true)
+	const [sections, setSection] = useState<ISection[]>([])
+	const totalHours = course.totalDuration.split('.')[0]
+	async function getSections() {
+		try {
+			const result = await getCourseSections(course._id)
+			setSection(result)
+			setIsLoading(false)
+		} catch (error) {
+			throw new Error(`Nimadur hato ${error}`)
+		}
+	}
+	useEffect(() => {
+		getSections()
+	}, [])
+
 	return (
 		<>
 			<div className='mt-6 rounded-md bg-gradient-to-t from-background to-secondary p-4 lg:p-6'>
@@ -28,7 +44,7 @@ function Overview() {
 					{t('whatYouWillLearn')}
 				</h2>
 				<div className='mt-5 grid grid-cols-1 md:grid-cols-2 gap-4'>
-					{learn.split(', ').map(item => (
+					{course.learning.split(', ').map(item => (
 						<div className='flex gap-2' key={item}>
 							<BadgeCheck className='size-5 text-blue-500' />
 							<p className='flex-1'>{item}</p>
@@ -49,7 +65,9 @@ function Overview() {
 						<p className='font-space-grotesk text-xl font-bold mt-2'>
 							{t('numberOfModules')}
 						</p>
-						<div className='text-xl font-medium text-blue-300'>4</div>
+						<div className='text-xl font-medium text-blue-300'>
+							{course.totalSections}
+						</div>
 					</div>
 
 					{/* Lessons Count */}
@@ -59,7 +77,7 @@ function Overview() {
 							{t('numberOfLessons')}
 						</p>
 						<div className='text-xl font-medium text-blue-300'>
-							90 {t('pieces')}
+							{course.totalLessons} {t('pieces')}
 						</div>
 					</div>
 
@@ -70,19 +88,25 @@ function Overview() {
 							{t('courseDuration')}
 						</p>
 						<div className='text-xl text-blue-300 font-medium'>
-							20 {t('hours')} 40 {t('minutes')}
+							{totalHours === '0' ? null : `${totalHours} ${t('hours')} `}
+							{course.totalDuration.split('.')[1]} {t('minutes')}
 						</div>
 					</div>
 				</div>
 				<Separator className='my-3' />
-				<Accordion type='single' collapsible>
-					<AccordionItem value='item-1'>
-						<AccordionTrigger>Is it accessible?</AccordionTrigger>
-						<AccordionContent>
-							Yes. It adheres to the WAI-ARIA design pattern.
-						</AccordionContent>
-					</AccordionItem>
-				</Accordion>
+				{isLoading ? (
+					<div className='mt-4 flex flex-col gap-3'>
+						{Array.from({ length: course.totalSections }).map((_, i) => (
+							<SectionLoading key={i} />
+						))}
+					</div>
+				) : (
+					<Accordion type='single' collapsible>
+						{sections.map(section => (
+							<SectionList key={section._id} {...section} />
+						))}
+					</Accordion>
+				)}
 			</div>
 
 			<div className='mt-8 rounded-md  bg-secondary  p-4 lg:p-6'>
@@ -90,7 +114,7 @@ function Overview() {
 					{t('courseForWhom')}
 				</h2>
 				<div className='pt-2'>
-					{forWhom.split(', ').map(item => (
+					{course.requirements.split(', ').map(item => (
 						<div className='flex mt-1 items-center' key={item}>
 							<Dot />
 							<p className='flex-1 text-slate-400'>{item}</p>
@@ -126,9 +150,4 @@ function Overview() {
 		</>
 	)
 }
-
 export default Overview
-
-const learn = 'JavaScript, AJAX, Algoritm, Promise, Git va Github, JSON-Server'
-const forWhom =
-	"Dasturlashga qiziqish borlar, JavaScript dasturlash tilini o'rganish istagi, Amaliy loyihalar qilish"

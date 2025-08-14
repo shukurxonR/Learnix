@@ -12,7 +12,10 @@ const CourseSchema = new Schema(
 		oldPrice: Number,
 		currentPrice: Number,
 		previewImage: String,
+		slug: String,
+		tags: String,
 		published: { type: Boolean, default: false },
+		instructor: { type: Schema.Types.ObjectId, ref: 'User' },
 	},
 	{ timestamps: true }
 )

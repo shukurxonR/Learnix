@@ -16,6 +16,7 @@ export default authMiddleware({
 		'/:lng/blogs/:slug',
 		'/:lng/instructor/create-course',
 		'/:lng/instructor/my-course',
+		'/:lng/instructor/my-course/:courseid',
 		'/:lng/instructor/dashboard',
 		'/:lng/instructor/reviews',
 		'/:lng/instructor/settings',

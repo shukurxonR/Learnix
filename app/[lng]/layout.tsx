@@ -7,9 +7,12 @@ import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin'
 import type { Metadata } from 'next'
 import { extractRouterConfig } from 'uploadthing/server'
 
+import SiteAccessGate from '@/components/shared/pasword-modal'
+import { Toaster } from '@/components/ui/sonner'
 import { Roboto, Space_Grotesk as SpaceGrotesk } from 'next/font/google'
 import { ourFileRouter } from './api/uploadthing/core'
 import './globals.css'
+
 const roboto = Roboto({
 	subsets: ['latin', 'cyrillic'],
 	weight: ['100', '300', '400', '500', '700', '900'],
@@ -50,7 +53,10 @@ export default function RootLayout({ children, params: { lng } }: Props) {
 						disableTransitionOnChange
 					>
 						<NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
-						{children}
+						<SiteAccessGate>
+							{children} {/* Kod to‘g‘ri kiritilsa, children ochiladi */}
+						</SiteAccessGate>
+						<Toaster position='top-center' />
 					</ThemeProvider>
 				</body>
 			</html>

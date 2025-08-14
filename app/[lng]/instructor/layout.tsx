@@ -8,7 +8,7 @@ function layout({ children }: ChildProp) {
 		<div>
 			<Navbar />
 			<Sidebar />
-			<main className='w-full pt-[12vh] pl-[320px]'>
+			<main className='w-full pt-[12vh] pl-[320px] p-4'>
 				<div className='size-full rounded-md bg-secondary px-4 pb-4'>
 					{children}
 				</div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { ICourses } from '@/app.types'
 import CoursesCard from '@/components/cards/courses-card'
 import { Button } from '@/components/ui/button'
 import {
@@ -9,16 +10,31 @@ import {
 	CarouselNext,
 	CarouselPrevious,
 } from '@/components/ui/carousel'
-import { courses, filterCourses } from '@/constants/const'
+import { filterCourses } from '@/constants/const'
 
 import useTranslate from '@/hooks/use-lng'
+import { formUrlQuery } from '@/lib/utils'
 import Autoplay from 'embla-carousel-autoplay'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-function FilteredCourses() {
-	const [filter, setFilter] = useState('all')
-
+interface Props {
+	courses: ICourses[]
+}
+function FilteredCourses({ courses }: Props) {
 	const t = useTranslate()
+
+	const searchParams = useSearchParams()
+	const router = useRouter()
+
+	const onUpdateParams = (value: string) => {
+		const newUrl = formUrlQuery({
+			value,
+			key: 'filter',
+			params: searchParams.toString(),
+			toCourses: true,
+		})
+		router.push(newUrl)
+	}
 	return (
 		<div className='container max-w-6xl mx-auto py-12 px-4 '>
 			<div className='flex items-center justify-between max-md:flex-col max-md:items-start'>
@@ -35,8 +51,8 @@ function FilteredCourses() {
 						<Button
 							key={categor.label}
 							round={'full'}
-							variant={filter === categor.name ? 'secondary' : 'ghost'}
-							onClick={() => setFilter(categor.name)}
+							variant={'all' === categor.name ? 'secondary' : 'ghost'}
+							onClick={() => onUpdateParams(categor.name)}
 							className='max-md:w-auto max-md:flex-1 max-md:text-sm  max-md:px-2  md:h-9 md:rounded-full md:px-6' // Tugmalarga kichik ekranlarda moslashish uchun sinflar
 						>
 							{t(categor.label)}

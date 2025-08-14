@@ -57,11 +57,10 @@ export const companies = [
 
 export const filterCourses = [
 	{ label: 'cateogry1', name: 'all' },
-	{ label: 'cateogry2', name: 'trending' },
-	{ label: 'cateogry3', name: 'popular' },
-	{ label: 'cateogry4', name: 'featured' },
+	{ label: 'cateogry2', name: 'newest' },
+	{ label: 'cateogry3', name: 'lowest-price' },
+	{ label: 'cateogry4', name: 'highest-price' },
 ]
-
 export const filterLevels = [
 	{ label: 'level1', name: 'all' },
 	{ label: 'level2', name: 'beginner' },
@@ -246,3 +245,29 @@ export const courseCategory = [
 	'game',
 ]
 export const courseLanguage = ['english', 'uzbek', 'russian', 'turkish']
+
+export const editorConfig = {
+	height: 150,
+	menubar: false,
+	plugins: [
+		'advlist',
+		'autolink',
+		'lists',
+		'link',
+		'image',
+		'charmap',
+		'preview',
+		'anchor',
+		'searchreplace',
+		'visualblocks',
+		'codesample',
+		'fullscreen',
+		'insertdatetime',
+		'media',
+		'table',
+	],
+	toolbar: 'link |' + 'bullist numlist',
+	content_style: 'body { font-family:Inter; font-size:16px }',
+	skin: 'oxide-dark',
+	content_css: 'dark',
+}

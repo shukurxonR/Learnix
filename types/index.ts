@@ -49,5 +49,5 @@ export interface ITag {
 } //
 
 export interface LngParams {
-	params: { lng: string }
+	params: { lng: string; slug: string }
 }

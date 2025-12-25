@@ -3,15 +3,15 @@ import Link from 'next/link'
 
 function Logo() {
 	return (
-		<Link href={'/'} className='flex items-center gap-2'>
+		<Link href={'/'} className='flex items-center '>
 			<Image
-				src={'/logo.svg'}
+				src={'/logp.png'}
 				alt='logo'
-				width={50}
-				height={50}
+				width={80}
+				height={80}
 				className='rounded-full'
 			/>
-			<h1 className=' font-roboto text-3xl font-bold '>Somfit </h1>
+			<h1 className=' font-roboto text-3xl font-bold '>Learnix </h1>
 		</Link>
 	)
 }

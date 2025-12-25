@@ -20,6 +20,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 interface Props {
 	courses: ICourses[]
 }
+
 function FilteredCourses({ courses }: Props) {
 	const t = useTranslate()
 
@@ -28,9 +29,9 @@ function FilteredCourses({ courses }: Props) {
 
 	const onUpdateParams = (value: string) => {
 		const newUrl = formUrlQuery({
-			value,
-			key: 'filter',
 			params: searchParams.toString(),
+			key: 'filter',
+			value,
 			toCourses: true,
 		})
 		router.push(newUrl)

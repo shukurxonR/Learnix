@@ -16,9 +16,11 @@ const CourseSchema = new Schema(
 		tags: String,
 		published: { type: Boolean, default: false },
 		instructor: { type: Schema.Types.ObjectId, ref: 'User' },
+		purchases: [{ type: Schema.Types.ObjectId, ref: 'Purchase' }],
 	},
 	{ timestamps: true }
 )
 
 const Course = models.Course || model('Course', CourseSchema)
+
 export default Course

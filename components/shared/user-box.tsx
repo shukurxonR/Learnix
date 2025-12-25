@@ -21,8 +21,8 @@ function UserBox() {
 				</Avatar>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
-				className='mr-10 w-64 '
-				align='start'
+				className=' w-64 '
+				align='end'
 				alignOffset={11}
 				forceMount
 			>

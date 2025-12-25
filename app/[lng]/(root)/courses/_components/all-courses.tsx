@@ -1,6 +1,7 @@
 'use client'
 import { ICourses } from '@/app.types'
 import CoursesCard from '@/components/cards/courses-card'
+import NoResult from '@/components/shared/no-result'
 import Pagination from '@/components/shared/pagination'
 import {
 	Select,
@@ -13,6 +14,7 @@ import { courseLanguage, filterCourses, filterLevels } from '@/constants/const'
 import useTranslate from '@/hooks/use-lng'
 import { formUrlQuery } from '@/lib/utils'
 import { useRouter, useSearchParams } from 'next/navigation'
+
 interface Props {
 	result: {
 		courses: ICourses[]
@@ -39,10 +41,12 @@ function AllCourses({ result }: Props) {
 	return (
 		<div className='container mx-auto mt-12 max-w-6xl px-4'>
 			<div className='flex items-center justify-between max-md:flex-col max-md:items-start max-md:space-y-2'>
-				<h2>
-					{t('result1')}{' '}
-					<span className='font-space-grotesk font-bold'>250</span>{' '}
-					{t('result2')}
+				<h2 className='flex items-center gap-1'>
+					<span>{t('result1')}</span>
+					<span className='font-space-grotesk font-bold text-2xl '>
+						{result.totalCourses}
+					</span>
+					<span>{t('result2')}</span>
 				</h2>
 				<div className='flex items-center gap-2'>
 					<span>{t('sortBy')}</span>
@@ -85,11 +89,18 @@ function AllCourses({ result }: Props) {
 					</Select>
 				</div>
 			</div>
+			{/*  ////////////////////////*/}
 			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4'>
 				{result.courses.map(course => (
 					<CoursesCard {...course} key={course.title} />
 				))}
 			</div>
+			{result.courses.length === 0 && (
+				<NoResult
+					title="Ko'rsatish uchun hech qanday kurslar yo'q"
+					description="O'zingizga mos kurslarni toping! 🚀 Xozirda sizning so'rovingizga to'g'ri keladigon kurslar bizda mavjud emass. Tez kunda qo'shiladi! 💡"
+				/>
+			)}
 			<Pagination pageNumber={page ? +page : 1} isNext={result.isNext} />
 		</div>
 	)

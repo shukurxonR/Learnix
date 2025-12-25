@@ -1,24 +1,32 @@
-'use client'
-import { UserProfile } from '@clerk/nextjs'
-import { dark } from '@clerk/themes'
-import { useTheme } from 'next-themes'
+import { getUserById } from '@/actions/user.action'
+import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { auth } from '@clerk/nextjs'
 import Header from '../_components/header'
+import Account from './_components/account'
+import Profile from './_components/profile'
 
-function Page() {
-	const { resolvedTheme } = useTheme()
+async function Page() {
+	const { userId } = auth()
+	const userJSON = await getUserById(userId!)
+	const user = JSON.parse(JSON.stringify(userJSON))
+
 	return (
 		<>
 			<Header title='Sattings' description='Manage your accaount settings' />
-			<div className='mt-6'>
-				<UserProfile
-					appearance={{
-						baseTheme: resolvedTheme === 'dark' ? dark : undefined,
-						variables: {
-							colorBackground: resolvedTheme === 'dark' ? '#020817' : '#fff',
-						},
-					}}
-				/>
-			</div>
+			<Separator className='my-3 bg-muted-foreground' />
+			<Tabs defaultValue='profile'>
+				<TabsList>
+					<TabsTrigger value='profile'>Profile</TabsTrigger>
+					<TabsTrigger value='account'>Account</TabsTrigger>
+				</TabsList>
+				<TabsContent value='profile'>
+					<Profile />
+				</TabsContent>
+				<TabsContent value='account'>
+					<Account {...user} />
+				</TabsContent>
+			</Tabs>
 		</>
 	)
 }

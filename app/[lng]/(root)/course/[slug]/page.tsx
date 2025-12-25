@@ -22,6 +22,7 @@ async function CoursesSlug({ params: { lng, slug } }: LngParams) {
 
 	const coursesJSON = await getFeaturedCourses()
 	const courses = JSON.parse(JSON.stringify(coursesJSON))
+
 	const { t } = await translation(lng)
 
 	return (

@@ -2,7 +2,6 @@
 
 import { getCourseSections } from '@/actions/section-action'
 import { ICourses, ISection } from '@/app.types'
-import ReviewCard from '@/components/cards/overview-card'
 import SectionLoading from '@/components/shared/section-loading'
 import { Accordion } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
@@ -102,9 +101,10 @@ function Overview(course: ICourses) {
 					</div>
 				) : (
 					<Accordion type='single' collapsible>
-						{sections.map(section => (
-							<SectionList key={section._id} {...section} />
-						))}
+						{sections.length > 0 &&
+							sections.map(section => (
+								<SectionList key={section._id} {...section} />
+							))}
 					</Accordion>
 				)}
 			</div>
@@ -134,10 +134,10 @@ function Overview(course: ICourses) {
 					</div>
 				</div>
 				<div className='mt-5 grid grid-cols-1 gap-2 lg:grid-cols-2'>
+					{/* <ReviewCard />
 					<ReviewCard />
 					<ReviewCard />
-					<ReviewCard />
-					<ReviewCard />
+					<ReviewCard /> */}
 				</div>
 				<Button
 					round={'full'}

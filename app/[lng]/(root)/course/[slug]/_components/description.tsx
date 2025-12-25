@@ -1,8 +1,10 @@
 'use client'
 
+import { purchaseCourse } from '@/actions/course-action'
 import { ICourses } from '@/app.types'
 import { Button } from '@/components/ui/button'
 import useTranslate from '@/hooks/use-lng'
+import { useAuth } from '@clerk/nextjs'
 import {
 	BarChart2,
 	Clock,
@@ -10,11 +12,32 @@ import {
 	Languages,
 	MonitorPlay,
 } from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { GrCertificate } from 'react-icons/gr'
+import { toast } from 'sonner'
 
 function Description(course: ICourses) {
 	const t = useTranslate()
+	const totalHours = course.totalDuration.split('.')[0]
+	const [isLoading, setIsLoading] = useState(false)
 
+	const { userId } = useAuth()
+	const router = useRouter()
+	const { lng } = useParams()
+
+	const onPurchase = async () => {
+		setIsLoading(true)
+		const result = purchaseCourse(course._id, userId!)
+			.then(() => router.push(`/${lng}/dashboard/${course._id}`))
+			.catch(() => setIsLoading(false))
+
+		toast.promise(result, {
+			loading: 'Loading...',
+			success: 'Successfully!',
+			error: 'Something went wrong!',
+		})
+	}
 	return (
 		<div className='rounded-md border bg-secondary/50 p-4 shadow-lg dark:shadow-white/20 lg:sticky lg:top-24 lg:p-6'>
 			<div className='flex items-center justify-between font-space-grotesk'>
@@ -35,7 +58,13 @@ function Description(course: ICourses) {
 			<Button size={'lg'} className='mt-4 w-full font-bold'>
 				{t('addToCart')}
 			</Button>
-			<Button size={'lg'} className='mt-2 w-full font-bold' variant={'outline'}>
+			<Button
+				size={'lg'}
+				className='mt-2 w-full font-bold'
+				variant={'outline'}
+				onClick={onPurchase}
+				disabled={isLoading}
+			>
 				{t('buyNow')}
 			</Button>
 
@@ -57,8 +86,8 @@ function Description(course: ICourses) {
 					<span className='font-bold'>{t('durations')}</span>
 				</div>
 				<p className='text-muted-foreground'>
-					{course.totalDuration.split('.')[0]} {t('hours')},
-					{course.totalDuration.split('.')[1]} {t('hours')}
+					{totalHours === '0' ? null : t('hours')}
+					{course.totalDuration.split('.')[1]} {t('minuts')}
 				</p>
 			</div>
 

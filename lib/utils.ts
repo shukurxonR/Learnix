@@ -47,6 +47,31 @@ export function formUrlQuery({
 		{ skipNull: true }
 	)
 }
+
+interface RemoveUrlQueryParams {
+	params: string
+	keysToRemove: string[]
+}
+
+export const removeKeysFromQuery = ({
+	params,
+	keysToRemove,
+}: RemoveUrlQueryParams) => {
+	const currentUrl = qs.parse(params)
+
+	keysToRemove.forEach(key => {
+		delete currentUrl[key]
+	})
+
+	return qs.stringifyUrl(
+		{
+			url: window.location.pathname,
+			query: currentUrl,
+		},
+		{ skipNull: true }
+	)
+}
+
 export const calculateTotalDuration = (lessons: ILesson[]) => {
 	let totalMinutes = 0
 
@@ -81,4 +106,15 @@ export const formatLessonTime = (lesson: ILesson) => {
 	}${seconds.toString().padStart(2, '0')}`
 
 	return formattedTime
+}
+export const formatAndDivideNumber = (num: number) => {
+	if (num >= 1000000) {
+		const formattedNum = (num / 1000000).toFixed(1)
+		return `${formattedNum}M`
+	} else if (num >= 1000) {
+		const formattedNum = (num / 1000).toFixed(1)
+		return `${formattedNum}K`
+	} else {
+		return num.toString()
+	}
 }

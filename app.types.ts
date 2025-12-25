@@ -1,3 +1,18 @@
+export interface IUser {
+	_id: string
+	clerkId: string
+	fullName: string
+	email: string
+	picture: string
+	role: string
+	bio: string
+	phone: string
+	job: string
+	website: string
+	linkedin: string
+	github: string
+	youtube: string
+}
 export interface ICourses {
 	_id: string
 	title: string
@@ -19,21 +34,6 @@ export interface ICourses {
 	totalSections: number
 	totalDuration: string
 }
-export interface IUser {
-	_id: string
-	clerkId: string
-	fullName: string
-	email: string
-	picture: string
-	role: string
-	bio: string
-	phone: string
-	job: string
-	website: string
-	linkedin: string
-	github: string
-	youtube: string
-}
 export interface ISection {
 	_id: string
 	title: string
@@ -54,7 +54,22 @@ export interface ILesson {
 		minutes: number
 		seconds: number
 	}
+	userProgress: userProgress[]
+}
+export interface userProgress {
+	userId: string
+	lessonId: string
+	isCompleted: string
 }
 export interface searchParamsProps {
 	searchParams: { [key: string]: string | undefined }
+}
+export interface IReview {
+	data: string
+	rating: number
+	user: IUser
+	createdAt: string
+	_id: string
+	course: ICourses
+	isFlag: boolean
 }

@@ -51,7 +51,9 @@ function NavBar() {
 							<ShoppingCart className='!w-5 !h-5' />
 						</Button>
 						<LanguageMenu />
-						<ModeToggle />
+						<div className='mx-4'>
+							<ModeToggle />
+						</div>
 					</div>
 
 					<div className='flex lg:hidden items-center pr-2'>

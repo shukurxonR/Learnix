@@ -2,7 +2,10 @@
 import { ICourses, ILesson } from '@/app.types'
 import Course from '@/database/course-model'
 import Lesson from '@/database/lesson-model'
+import Purchase from '@/database/purchase-model'
 import Section from '@/database/section.model'
+
+import UserProgress from '@/database/user-progress-model'
 import User from '@/database/user.model'
 import { connectToDatabase } from '@/lib/mongoose'
 import { calculateTotalDuration } from '@/lib/utils'
@@ -32,8 +35,8 @@ export const getCourses = async (params: GetCoursesParams) => {
 		const user = await User.findOne({ clerkId })
 
 		const courses = await Course.find({ instructor: user._id })
-			.skip(skipAmount)
-			.limit(pageSize)
+			.skip(skipAmount) // bu yerda otkazib yuboriladigan curslar
+			.limit(pageSize) // bu esa nechta olsin
 
 		const totalCourses = await Course.find({
 			instructor: user._id,
@@ -41,12 +44,34 @@ export const getCourses = async (params: GetCoursesParams) => {
 
 		const isNext = totalCourses > skipAmount + courses.length
 
-		return { courses, isNext, totalCourses }
-	} catch {
-		throw new Error('HAtooooooooooo!')
+		const allCourses = await Course.find({ instructor: user._id })
+			.select('purchases currentPrice')
+			.populate({
+				path: 'purchases',
+				model: Purchase,
+				select: 'course',
+				populate: {
+					path: 'course',
+					model: Course,
+					select: 'currentPrice',
+				},
+			})
+
+		const totalStudents = allCourses
+			.map(c => c.purchases.length)
+			.reduce((a, b) => a + b, 0)
+
+		const totalEearnings = allCourses
+			.map(c => c.purchases)
+			.flat()
+			.map(p => p.course.currentPrice)
+			.reduce((a, b) => a + b, 0)
+
+		return { courses, isNext, totalCourses, totalStudents, totalEearnings }
+	} catch (error) {
+		throw new Error(`Hato! ${error}`)
 	}
 }
-
 export const getCourseById = async (id: string) => {
 	try {
 		await connectToDatabase()
@@ -89,8 +114,8 @@ export const getFeaturedCourses = async () => {
 			.populate({ path: 'instructor', select: 'fullName picture', model: User })
 
 		return publishedCourses
-	} catch {
-		throw new Error('HAtooooooooooo!')
+	} catch (err) {
+		console.log('HAtolik', err, '<-')
 	}
 }
 
@@ -131,7 +156,7 @@ export const getDetailedCourse = cache(async (id: string) => {
 		)
 	}
 })
-
+//  /courses
 export const getAllCourses = async (params: GetAllCoursesParams) => {
 	try {
 		await connectToDatabase()
@@ -196,11 +221,158 @@ export const getAllCourses = async (params: GetAllCoursesParams) => {
 			.limit(pageSize)
 			.sort(sortOptions)
 
-		const totalCourses = await Course.find({ published: true }).countDocuments()
-		const allCourses = await Course.countDocuments(query)
-		const isNext = allCourses > skipAmount + courses.length
+		const totalCourses = await Course.find(query).countDocuments()
+
+		const isNext = totalCourses > skipAmount + courses.length
 
 		return { courses, isNext, totalCourses }
+	} catch (err) {
+		throw new Error(`Hatolik ${err}`)
+	}
+} /////////////////////////////////////////////
+
+export const purchaseCourse = async (course: string, clerkId: string) => {
+	try {
+		await connectToDatabase()
+		const user = await User.findOne({ clerkId })
+
+		const checkCourse = await Course.findById(course)
+			.select('purchases')
+			.populate({
+				path: 'purchases',
+				model: Purchase,
+				match: { user: user._id },
+			})
+
+		if (checkCourse.purchases.length > 0) {
+			return JSON.parse(JSON.stringify({ status: 200 }))
+		}
+
+		const purchase = await Purchase.create({ user: user._id, course })
+		await Course.findByIdAndUpdate(course, {
+			$push: { purchases: purchase._id },
+		})
+
+		return JSON.parse(JSON.stringify({ status: 200 }))
+	} catch (err) {
+		throw new Error(`Hatolik ${err}`)
+	}
+}
+
+export async function getDashboardCourse(clerkId: string, courseid: string) {
+	try {
+		await connectToDatabase()
+		const course = await Course.findById(courseid).select('title')
+
+		const sections = await Section.find({ course: courseid })
+			.select('title')
+			.sort({ position: 1 })
+			.populate({
+				path: 'lessons',
+				model: Lesson,
+				select: 'title userProgress',
+				options: { sort: { position: 1 } },
+				populate: {
+					path: 'userProgress',
+					match: { userId: clerkId },
+					model: UserProgress,
+					select: 'lessonId',
+				},
+			})
+
+		const lessons = sections.map(section => section.lessons).flat()
+		const lessonIds = lessons.map(lesson => lesson._id)
+
+		const validCompletedLessons = await UserProgress.find({
+			userId: clerkId,
+			lessonId: { $in: lessonIds },
+			isCompleted: true,
+		})
+
+		const progressPercentage =
+			(validCompletedLessons.length / lessons.length) * 100
+
+		return { course, sections, progressPercentage }
+	} catch (err) {
+		throw new Error(`Hatolik ${err}`)
+	}
+}
+
+export async function completeLesson(
+	lessonId: string,
+	userId: string,
+	path: string
+) {
+	try {
+		await connectToDatabase()
+		const userProgress = await UserProgress.findOne({ userId, lessonId })
+		if (userProgress) {
+			userProgress.isCompleted = true
+			await userProgress.save()
+		} else {
+			const newUserProgress = new UserProgress({
+				userId,
+				lessonId,
+				isCompleted: true,
+			})
+
+			const lesson = await Lesson.findById(lessonId)
+			lesson.userProgress.push(newUserProgress._id)
+
+			await lesson.save()
+			await newUserProgress.save()
+		}
+		revalidatePath(path)
+	} catch (err) {
+		throw new Error(`Hatolik ${err}`)
+	}
+}
+
+export async function uncompleteLesson(lessonId: string, path: string) {
+	try {
+		await connectToDatabase()
+		await UserProgress.findOneAndDelete({ lessonId })
+
+		revalidatePath(path)
+	} catch (err) {
+		throw new Error(`Hatolik ${err}`)
+	}
+}
+
+export async function addArchiveCourse(clerkId: string, courseId: string) {
+	try {
+		await connectToDatabase()
+		const isArchive = await User.findOne({
+			clerkId,
+			archiveCourses: courseId,
+		})
+		if (isArchive) {
+			throw new Error('Hatolik')
+		}
+
+		const user = await User.findOne({ clerkId })
+		await User.findByIdAndUpdate(user._id, {
+			$push: { archiveCourses: courseId },
+		})
+	} catch (err) {
+		throw new Error(`Hatolik ${err}`)
+	}
+}
+export async function addFavoriteCourse(clerkId: string, courseId: string) {
+	try {
+		await connectToDatabase()
+		const favorited = await User.findOne({
+			clerkId,
+			favouriteCourses: courseId,
+		})
+		if (favorited) {
+			throw new Error('eooe archive topilmadi')
+		}
+
+		const user = await User.findOne({ clerkId })
+		await User.findByIdAndUpdate(user._id, {
+			$push: { favouriteCourses: courseId },
+		})
 	} catch (err) {
 		throw new Error(`Hatolik ${err}`)
 	}

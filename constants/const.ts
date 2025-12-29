@@ -162,14 +162,14 @@ export const categoriess = [
 
 export const instructors = [
 	{
-		name: 'Chris Impley',
-		image: '/author/samar.jpg',
+		name: 'Shukurxondev',
+		image: '/author/shukurxon.jpg',
 		job: 'Web Developer',
 	},
 	{
-		name: 'Thomas Winter',
-		image: '/author/thomas-macaulay.jpg',
-		job: 'Photographer',
+		name: 'Samar Badriddinov',
+		image: '/author/samar.jpg',
+		job: 'Mobil developer',
 	},
 	{
 		name: 'Emma Watson',

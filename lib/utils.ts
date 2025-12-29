@@ -118,3 +118,5 @@ export const formatAndDivideNumber = (num: number) => {
 		return num.toString()
 	}
 }
+
+// Git, GitHub, Redux, Zustand, Axios, Zod, Stripe, Bcrypt, CMS, React Query, query string, ShadCN
